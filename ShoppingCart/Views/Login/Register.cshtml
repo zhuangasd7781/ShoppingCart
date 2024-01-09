@@ -1,0 +1,105 @@
+﻿@{
+}
+<head>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="vm" v-cloak>
+        <div class="row" style="width:500px">
+            帳號:
+            <input class="form-control" type="text" v-model="account.id" />
+        </div>
+        <div class="row" style="width:500px">
+            密碼:
+            <input class="form-control" type="password" v-model="account.pwd" />
+        </div>
+        <div class="row" style="width:500px">
+            名稱:
+            <input class="form-control" type="text" v-model="account.name" />
+        </div>
+        <div class="row" style="width:500px">
+            電話:
+            <input class="form-control" type="text" v-model="account.phone" />
+        </div>
+        <div>
+            <p class="change_link" style="font-size:12px;">
+                已經有帳號?
+                <strong><a href="@Url.Action("Index")">回到登入</a></strong>
+            </p>
+        </div>
+        <div class="row" style="width:500px">
+            <button class="btn btn-primary" v-on:click="saveAccount">註冊</button>
+        </div>
+    </div>
+</body>
+@section Scripts{
+    <script>
+        new Vue({
+            el: '#vm',
+            data: {
+                account: {},
+            },
+            methods: {
+                saveAccount: function () {
+                    var Acc = this.account.id;
+                    if (!Acc === null || Acc === "") {
+                        swal.fire({
+                            icon: 'error',
+                            title: '請輸入帳號',
+                        })
+                        return;
+                    }
+                    var Pwd = this.account.pwd;
+                    if (!Pwd === null || Pwd === "") {
+                        swal.fire({
+                            icon: 'error',
+                            title: '請輸入密碼',
+                        })
+                        return;
+                    }
+                    var Name = this.account.name;
+                    if (!Name === null || Name === "") {
+                        swal.fire({
+                            icon: 'error',
+                            title: '請輸入名稱',
+                        })
+                        return;
+                    } var Phone = this.account.phone;
+                    if (!Phone === null || Phone === "") {
+                        swal.fire({
+                            icon: 'error',
+                            title: '請輸入電話',
+                        })
+                        return;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("SaveAccount")',
+                        data: { account: this.account },
+                        success: function (response) {
+                            swal.fire({
+                                title: "註冊成功",
+                                text: "",
+                                icon: 'success',
+                            }).then(function () {
+                                window.location.href = '@Url.Action("Index")';
+                            });
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                title: "註冊失敗",
+                                text: error.responseJSON.value,
+                                icon: 'error',
+                            });
+                        }
+                    })
+                },
+            },
+
+        })
+    </script>
+}

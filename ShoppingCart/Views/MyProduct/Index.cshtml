@@ -1,0 +1,216 @@
+﻿@section head{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="@Url.Content("~/datatables-bs4/css/dataTables.bootstrap4.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/datatables-responsive/css/responsive.bootstrap4.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/datatables-buttons/css/buttons.bootstrap4.min.css")">
+}
+@{
+    var user = Context.User();
+}
+<head>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+
+        .piclogo {
+            width: 132px;
+            height: 132px;
+        }
+    </style>
+</head>
+<body>
+    <div id="vm" v-cloak>
+        <button class="btn btn-primary" v-on:click="newCommodity">新增產品</button>
+        <hr/>
+        <table id="dataTable" class="table" style="border-radius: 10px" data-datatable>
+            <thead>
+                <tr class="header-row" style="word-break: keep-all; border-bottom: 2px solid black;">
+                    <th>產品圖片</th>
+                    <th>產品名稱</th>
+                    <th>產品價格</th>
+                    <th style="width:175px">
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="table-row data-row" style="border-top: 1px solid gray;" v-for="Product in myProducts">
+                    <td><img class="piclogo" :src="Product.pic" /></td>
+                    <td>{{ Product.name }}</td>
+                    <td>{{ Product.price }}</td>
+                    <td>
+                        <button class="btn btn-danger" v-on:click="removeProduct(Product.pk)">移除產品</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <!---- modal-form: 新増/編輯 ----->
+        <div class="modal" tabindex="-1" id="newCommodityModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">新增產品</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            產品名稱:
+                            <input class="form-control" type="text" v-model="commodity.name" />
+                        </div>
+                        <div class="row">
+                            產品價格:
+                            <input class="form-control" type="text" v-model="commodity.price" />
+                        </div>
+                        <div class="row">
+                            <label class="bold-text" for="fileInput">上傳圖片:</label>
+                            <input type="file" id="fileInput" name="FileInput" v-on:change="fileSelected" accept="image/*">
+                        </div>
+                        <div class="row">
+                            <span class="bold-text">產品封面</span>
+                            <br />
+                            <img src="" style="height:150px" id="ShowImage" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" v-on:click="setCommodity">新增</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+@section Scripts{
+    <!-- DataTables  & Plugins -->
+    <script src="@Url.Content("~/datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/datatables-bs4/js/dataTables.bootstrap4.min.js")"></script>
+    <script src="@Url.Content("~/datatables-responsive/js/dataTables.responsive.min.js")"></script>
+    <script src="@Url.Content("~/datatables-responsive/js/responsive.bootstrap4.min.js")"></script>
+    <script src="@Url.Content("~/datatables-buttons/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/datatables-buttons/js/buttons.bootstrap4.min.js")"></script>
+    <script src="@Url.Content("~/datatables-buttons/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/datatables-buttons/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/datatables-buttons/js/buttons.colVis.min.js")"></script>
+    <script>
+        new Vue({
+            el: '#vm',
+            data: {
+                commodity:{},
+                myProducts: @Html.Raw(ViewBag.MyProducts),
+            },
+            methods: {
+                newCommodity:function(){
+                    this.commodity={};
+                    $('#ShowImage').attr("src", '');
+                    $('#fileInput').val('');
+                    $("#newCommodityModal").modal('show');
+                },
+                setCommodity:function(){
+                    var commodity = JSON.stringify(this.commodity);
+                    var commodityName = this.commodity.name;
+                    if (!commodityName || commodityName.trim == "") {
+                        swal.fire({
+                            title: "失敗",
+                            text: "產品名稱不可為空",
+                            icon: 'error',
+                        });
+                        return;
+                    }
+                    var commodityPrice = this.commodity.price;
+                    if (!commodityPrice || commodityPrice.trim == "") {
+                        swal.fire({
+                            title: "失敗",
+                            text: "產品價格不可為空",
+                            icon: 'error',
+                        });
+                        return;
+                    }
+                    var fileInput = document.getElementById('fileInput');
+                    var file = fileInput.files[0];
+                    var formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('commodityJson', commodity);
+                    formData.append('AccPk', @user.pk);
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/MyProduct/Set', true);
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                swal.fire({
+                                    title: "新增成功",
+                                    text: "",
+                                    icon: 'success',
+                                }).then(function () {
+                                    window.location.href = '@Url.Action("Index","MyProduct")';
+                                });
+                            } else {
+                                swal.fire({
+                                    title: "新增失敗",
+                                    text: xhr.status,
+                                    icon: 'error',
+                                });
+                            }
+                        }
+                    };
+                    xhr.send(formData);
+
+                },
+                removeProduct: function (pk) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Delete")',
+                        data: { pk: pk },
+                        success: function () {
+                            swal.fire({
+                                title: "刪除成功",
+                                text: "",
+                                icon: 'success',
+                            }).then(function () {
+                                window.location.href = '@Url.Action("Index")';
+                            });
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                title: "刪除失敗",
+                                text: error.responseJSON.value,
+                                icon: 'error',
+                            });
+                        }
+                    })
+                },
+                //產品封面圖瀏覽
+                fileSelected(e) {
+                    const file = e.target.files.item(0);
+                    const reader = new FileReader();
+                    reader.addEventListener('load', this.imageLoaded);
+                    reader.readAsDataURL(file);
+                },
+                imageLoaded(e) {
+                    var imagePreview = document.getElementById('ShowImage');
+                    imagePreview.src = e.target.result;
+                },
+                //!產品封面圖瀏覽
+            },
+            mounted() {
+                this.dataTable = $("table[data-datatable]").DataTable({
+                    "paging": true,
+                    "pageLength": 6,
+                    "lengthChange": false,
+                    "searching": true,
+                    "ordering": true,
+                    "info": false, // 隱藏 Showing 1 to 5 of 12 entries
+                    "autoWidth": false,
+                    "responsive": false,
+                    "language": {
+                        "search": "搜尋："
+                    },
+                    //"createdRow": function (row, data, index) {
+                    //    // 生成序號
+                    //    $('td', row).eq(0).html(index + 1);
+                    //}
+                });
+            },
+
+        })
+    </script>
+}

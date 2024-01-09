@@ -1,0 +1,113 @@
+﻿@section head{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="@Url.Content("~/datatables-bs4/css/dataTables.bootstrap4.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/datatables-responsive/css/responsive.bootstrap4.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/datatables-buttons/css/buttons.bootstrap4.min.css")">
+}
+@{
+    var user = Context.User();
+}
+<head>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+
+        .piclogo {
+            width: 132px;
+            height: 132px;
+        }
+    </style>
+</head>
+<body>
+    <div id="vm" v-cloak>
+        <table id="dataTable" class="table" style="border-radius: 10px" data-datatable>
+            <thead>
+                <tr class="header-row" style="word-break: keep-all; border-bottom: 2px solid black;">
+                    <th>產品圖片</th>
+                    <th>產品名稱</th>
+                    <th>產品價格</th>
+                    <th>購買數量</th>
+                    <th style="width:175px">
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="table-row data-row" style="border-top: 1px solid gray;" v-for="Product in myProducts">
+                    <td><img class="piclogo" :src="Product.pic" /></td>
+                    <td>{{ Product.name }}</td>
+                    <td>{{ Product.price }}</td>
+                    <td>{{ Product.count }}</td>
+                    <td>
+                        <button class="btn btn-danger" v-on:click="removeProduct(Product.pk)">移除產品</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+@section Scripts{
+    <!-- DataTables  & Plugins -->
+    <script src="@Url.Content("~/datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/datatables-bs4/js/dataTables.bootstrap4.min.js")"></script>
+    <script src="@Url.Content("~/datatables-responsive/js/dataTables.responsive.min.js")"></script>
+    <script src="@Url.Content("~/datatables-responsive/js/responsive.bootstrap4.min.js")"></script>
+    <script src="@Url.Content("~/datatables-buttons/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/datatables-buttons/js/buttons.bootstrap4.min.js")"></script>
+    <script src="@Url.Content("~/datatables-buttons/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/datatables-buttons/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/datatables-buttons/js/buttons.colVis.min.js")"></script>
+    <script>
+        new Vue({
+            el: '#vm',
+            data: {
+                myProducts: @Html.Raw(ViewBag.MyProducts),
+            },
+            methods: {
+                removeProduct: function (pk) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Delete")',
+                        data: { pk: pk },
+                        success: function () {
+                            swal.fire({
+                                title: "刪除成功",
+                                text: "",
+                                icon: 'success',
+                            }).then(function () {
+                                window.location.href = '@Url.Action("Index")';
+                            });
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                title: "刪除失敗",
+                                text: error.responseJSON.value,
+                                icon: 'error',
+                            });
+                        }
+                    })
+                },
+            },
+            mounted() {
+                this.dataTable = $("table[data-datatable]").DataTable({
+                    "paging": true,
+                    "pageLength": 6,
+                    "lengthChange": false,
+                    "searching": true,
+                    "ordering": true,
+                    "info": false, // 隱藏 Showing 1 to 5 of 12 entries
+                    "autoWidth": false,
+                    "responsive": false,
+                    "language": {
+                        "search": "搜尋："
+                    },
+                    //"createdRow": function (row, data, index) {
+                    //    // 生成序號
+                    //    $('td', row).eq(0).html(index + 1);
+                    //}
+                });
+            },
+
+        })
+    </script>
+}

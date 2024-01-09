@@ -1,0 +1,75 @@
+﻿@{
+}
+<head>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="vm" v-cloak>
+        <div class="row" style="width:500px">
+            帳號:
+            <input class="form-control" type="text" v-model="account.id" />
+        </div>
+        <div class="row" style="width:500px">
+            密碼:
+            <input class="form-control" type="password" v-model="account.pwd" />
+        </div>
+        <div>
+            <p class="change_link" style="font-size:12px;">
+                第一次使用?
+                <strong><a href="@Url.Action("Register")">建立帳號</a></strong>
+            </p>
+        </div>
+        <div class="row" style="width:500px">
+            <button class="btn btn-primary" v-on:click="LoginedIn">登入</button>
+        </div>
+    </div>
+</body>
+@section Scripts{
+    <script>
+        new Vue({
+            el: '#vm',
+            data: {
+                account: {},
+            },
+            methods: {
+                LoginedIn: function () {
+                    var Acc = this.account.id;
+                    if (!Acc || Acc === "") {
+                        swal.fire({
+                            icon: 'error',
+                            title: '請輸入登入帳號',
+                        })
+                        return;
+                    }
+                    var Pwd = this.account.pwd;
+                    if (!Pwd|| Pwd === "") {
+                        swal.fire({
+                            icon: 'error',
+                            title: '請輸入登入密碼',
+                        })
+                        return;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("LoggedIn")',
+                        data: { account: this.account },
+                        success: function () {
+                            window.location.href = '@Url.Action("Index","Home")';
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                title: "登入失敗",
+                                text: error.responseJSON.value,
+                                icon: 'error',
+                            });
+                        }
+                    })
+                },
+            },
+        })
+    </script>
+}

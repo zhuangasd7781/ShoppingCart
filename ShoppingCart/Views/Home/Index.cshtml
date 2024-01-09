@@ -1,0 +1,113 @@
+﻿@{
+    var user = Context.User()??new();
+}
+<head>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="vm" v-cloak>
+        <div class="row">
+            <div class="col-lg-4" v-for="Product in Products">
+                <div class="img-thumbnail" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                    <img :src="Product.pic" style="width:70%"/>
+                    <div class="caption">
+                        <h4>{{ Product.name }}</h4>
+                        <p>單價:{{ Product.price }}</p>
+                        <button class="btn btn-primary" v-on:click="showCartModal(Product)">加入購物車</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!---- modal-form: 新増/編輯 ----->
+        <div class="modal" tabindex="-1" id="addCartModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">加入購物車</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <button v-on:click="Decrease">-</button>
+                        <input v-model="count" />
+                        <button v-on:click="Increase">+</button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" v-on:click="addToTheCart">新增</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+@section Scripts{
+    <script>
+        new Vue({
+            el: '#vm',
+            data: {
+                Products: @Html.Raw(ViewBag.Products),
+                count:1,
+                addCartProduct:{},
+            },
+            methods: {
+                showCartModal: function (Product) {
+                    if(@user.pk===0){
+                        swal.fire({
+                            title: "請先登入",
+                            icon: 'error',
+                        }).then(function () {
+                            window.location.href = '@Url.Action("Index","Login")';
+                        });
+                        return;
+                    }
+                    count=1;
+                    this.addCartProduct = Product;
+                    $("#addCartModal").modal('show');
+                },
+                Decrease: function () {
+                    if(this.count===1){
+                        return;
+                    }
+                    this.count--;
+                },
+                Increase:function(){
+                    this.count++;
+                },
+                addToTheCart:function(){
+                    if (this.count === 0) {
+                        swal.fire({
+                            title: "訂購數量不可為0",
+                            icon: 'error',
+                        });
+                        return;
+                    }
+                    $.ajax({
+                        type:"POST",
+                        url: '@Url.Action("addToTheCart")',
+                        data: { accPk: @user.pk, commodityPk: this.addCartProduct.pk, count: this.count },
+                        success: function () {
+                            swal.fire({
+                                title: "新增成功",
+                                text: "",
+                                icon: 'success',
+                            }).then(function () {
+                                window.location.href = '@Url.Action("Index","Home")';
+                            });
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                title: "訂購失敗",
+                                text: error.responseJSON.value,
+                                icon: 'error',
+                            });
+                        }
+                    })
+                },
+            },
+        })
+    </script>
+}
