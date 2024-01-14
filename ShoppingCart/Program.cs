@@ -14,7 +14,8 @@ builder.Services.AddScoped<IDB, MySqlDB>(x =>
         $"port={builder.Configuration["db_Param:Port"]};" +
         $"Initial Catalog={builder.Configuration["db_Param:DbName"]};" +
         $"User Id={builder.Configuration["db_Param:UserId"]};" +
-        $"Password={builder.Configuration["db_Param:Password"]};";
+        $"Password={builder.Configuration["db_Param:Password"]};" +
+        $"Pooling=true;";
     return new MySqlDB(connectionString);
 });
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

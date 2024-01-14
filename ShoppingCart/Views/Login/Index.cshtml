@@ -37,22 +37,6 @@
             },
             methods: {
                 LoginedIn: function () {
-                    var Acc = this.account.id;
-                    if (!Acc || Acc === "") {
-                        swal.fire({
-                            icon: 'error',
-                            title: '請輸入登入帳號',
-                        })
-                        return;
-                    }
-                    var Pwd = this.account.pwd;
-                    if (!Pwd|| Pwd === "") {
-                        swal.fire({
-                            icon: 'error',
-                            title: '請輸入登入密碼',
-                        })
-                        return;
-                    }
                     $.ajax({
                         type: "POST",
                         url: '@Url.Action("LoggedIn")',

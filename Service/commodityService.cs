@@ -13,10 +13,10 @@ namespace Service
         public async Task<Models.commodity?> Get(uint pk)
         {
             string sql = @"
-SELECT `acc_fk`, `pk`, `name`, `pic`, `price`
-FROM `commodity`
-WHERE `pk` = ?pk
-;";
+                SELECT `acc_fk`, `pk`, `name`, `pic`, `price`
+                FROM `commodity`
+                WHERE `pk` = ?pk
+                ;";
             return (await _db.GetListAsync<Models.commodity>(sql, new Dictionary<string, object?>
             {
                 { "?pk", pk },

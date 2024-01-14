@@ -18,7 +18,7 @@ namespace ShoppingCart.Controllers
         public HomeController(ILogger<HomeController> logger, IDB _db)
         {
             _commodityBusiness = new commodityBusiness(_db);
-            _orderBusiness=new orderBusiness(_db);
+            _orderBusiness = new orderBusiness(_db);
             _logger = logger;
         }
 
@@ -47,10 +47,17 @@ namespace ShoppingCart.Controllers
             return RedirectToAction("Index", "LogIn");
         }
         [HttpPost]
-        public async Task<IActionResult> addToTheCart(int accPk,int commodityPk,int count)
+        public async Task<IActionResult> addToTheCart(int accPk, int commodityPk, int count)
         {
             try
             {
+                order dm = new order()
+                {
+                    acc_fk = accPk,
+                    commodity_fk = commodityPk,
+                    count = count,
+                    status = 0,
+                };
                 await _orderBusiness.Insert(accPk, commodityPk, count);
                 return Ok();
             }

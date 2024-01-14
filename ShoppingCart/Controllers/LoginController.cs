@@ -4,15 +4,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using DataBases;
+using Org.BouncyCastle.Crypto.Generators;
 
 namespace ShoppingCart.Controllers
 {
     public class LoginController : Controller
     {
-        accountBusiness _accountBusiness;
+        accountBusiness _accBusiness;
         public LoginController(IDB _db)
         {
-            _accountBusiness = new accountBusiness(_db);
+            _accBusiness = new accountBusiness(_db);
         }
         public IActionResult Index()
         {
@@ -28,18 +29,26 @@ namespace ShoppingCart.Controllers
         {
             try
             {
-                var user = await _accountBusiness.Get(account.id);
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage).ToList();
+                    return BadRequest(Json(errors));
+                    // return BadRequest(Json(errors.FirstOrDefault())); // 返回第一个错误
+                }
+
+                var user = await _accBusiness.Get(account.id);
                 if (user == null)
                 {
                     throw new Exception("帳號不存在");
                 }
-                if (account.pwd.MD5() != user.pwd)
+                if (!_accBusiness.Verify(account.pwd, user.pwd))
                 {
                     throw new Exception("密碼錯誤");
                 }
                 await HttpContext.SignIn(user);
-                return Ok();
 
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -52,8 +61,8 @@ namespace ShoppingCart.Controllers
         public async Task<IActionResult> SaveAccount(account account)
         {
             try
-            {                   
-                await _accountBusiness.Insert(account);
+            {
+                await _accBusiness.Insert(account);
                 return Ok();
 
             }

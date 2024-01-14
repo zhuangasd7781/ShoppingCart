@@ -37,7 +37,6 @@ namespace DataBases
                 return await cmd.ExecuteNonQueryAsync();
             }
         }
-
         public async Task<List<T>> GetListAsync<T>(string sql, Dictionary<string, object?> parameters) where T : new()
         {
             using (MySqlConnection conn = new MySqlConnection(_ConnectionString))
@@ -55,7 +54,6 @@ namespace DataBases
             }
             throw new NotImplementedException();
         }
-
         public async Task<List<T>> GetListAsync<T>(DbDataReader dr) where T : new()
         {
             List<T> list = new List<T>();
@@ -80,7 +78,7 @@ namespace DataBases
             }
             return list;
         }
+
+
     }
-
-
 }

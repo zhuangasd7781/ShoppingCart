@@ -1,5 +1,5 @@
 ﻿@{
-    var user = Context.User()??new();
+    var user = Context.User() ?? new();
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -25,29 +25,36 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li >
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        <li>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">首頁</a>
                         </li>
                         @if (string.IsNullOrEmpty(user.id))
-                        {
-                            <li class="nav-item" style="float:right">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Login" asp-action="Index">登入</a>
-                            </li>
-                        }
-                        else
                         {
                             <li class="nav-item" style="float:right">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="ShoppingCart" asp-action="Index">購物車</a>
                             </li>
                             <li class="nav-item" style="float:right">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Login" asp-action="Index">登入</a>
+                            </li>
+
+                        }
+                        else
+                        {
+                            <li class="nav-item" style="float:right">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="MyProduct" asp-action="Index">我的商品</a>
+                            </li>
+                            <li class="nav-item" style="float:right">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="MyOrder" asp-action="Index">我的訂單</a>
+                            </li>
+                            <li class="nav-item" style="float:right">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ShoppingCart" asp-action="Index">購物車</a>
                             </li>
                             <li class="nav-item" style="float:right">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="LogOut">登出</a>
                             </li>
                         }
                     </ul>
-                    </div>
+                </div>
             </div>
         </nav>
     </header>
@@ -63,16 +70,18 @@
         </div>
     </footer>
     @* <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
-            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-            crossorigin="anonymous"></script>*@
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>*@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <!-- SweetAlert2 -->
     <script src="~/sweetalert2/sweetalert2.all.min.js"></script>
+    <!-- js-cookie -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     <!-- Vue.js -->
     <script src="~/js/vue.js"></script>
     @await RenderSectionAsync("Scripts", required: false)

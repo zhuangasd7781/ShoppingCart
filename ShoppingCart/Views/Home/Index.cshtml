@@ -1,5 +1,5 @@
 ﻿@{
-    var user = Context.User()??new();
+    var user = Context.User() ?? new();
 }
 <head>
     <style>
@@ -13,7 +13,7 @@
         <div class="row">
             <div class="col-lg-4" v-for="Product in Products">
                 <div class="img-thumbnail" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
-                    <img :src="Product.pic" style="width:70%"/>
+                    <img :src="Product.pic" style="width:70%" />
                     <div class="caption">
                         <h4>{{ Product.name }}</h4>
                         <p>單價:{{ Product.price }}</p>
@@ -50,64 +50,76 @@
             el: '#vm',
             data: {
                 Products: @Html.Raw(ViewBag.Products),
-                count:1,
-                addCartProduct:{},
+                count: 1,
+                addCartProduct: {},
             },
             methods: {
                 showCartModal: function (Product) {
-                    if(@user.pk===0){
-                        swal.fire({
-                            title: "請先登入",
-                            icon: 'error',
-                        }).then(function () {
-                            window.location.href = '@Url.Action("Index","Login")';
-                        });
-                        return;
-                    }
-                    count=1;
+                    //if(@user.pk===0){
+                    //    swal.fire({
+                    //        title: "請先登入",
+                    //        icon: 'error',
+                    //    }).then(function () {
+                    //        window.location.href = '@Url.Action("Index","Login")';
+                    //    });
+                    //    return;
+                    //}
+                    count = 1;
                     this.addCartProduct = Product;
                     $("#addCartModal").modal('show');
                 },
                 Decrease: function () {
-                    if(this.count===1){
+                    if (this.count === 1) {
                         return;
                     }
                     this.count--;
                 },
-                Increase:function(){
+                Increase: function () {
                     this.count++;
                 },
-                addToTheCart:function(){
-                    if (this.count === 0) {
+                addToTheCart: function () {
+                    if (this.count <= 0) {
                         swal.fire({
-                            title: "訂購數量不可為0",
+                            title: "訂購數量不可小於或等於0",
                             icon: 'error',
                         });
                         return;
                     }
-                    $.ajax({
-                        type:"POST",
-                        url: '@Url.Action("addToTheCart")',
-                        data: { accPk: @user.pk, commodityPk: this.addCartProduct.pk, count: this.count },
-                        success: function () {
-                            swal.fire({
-                                title: "新增成功",
-                                text: "",
-                                icon: 'success',
-                            }).then(function () {
-                                window.location.href = '@Url.Action("Index","Home")';
-                            });
-                        },
-                        error: function (error) {
-                            swal.fire({
-                                title: "訂購失敗",
-                                text: error.responseJSON.value,
-                                icon: 'error',
-                            });
-                        }
-                    })
+
+                    // 获取当前购物车
+                    var cart = this.getCart();
+                    var found = cart.find(item => item.commodityPk === this.addCartProduct.pk);
+                    //车中是否已有该商品
+                    if (found) {
+                        // 如果商品已存在，更新数量
+                        found.count += this.count;
+                    } else {
+                        // 如果商品不存在，添加到购物车
+                        cart.push({
+                            accPk: @Html.Raw(user.pk),
+                            commodityPk: this.addCartProduct.pk,
+                            count: this.count
+                        });
+                    }
+
+                    // 保存购物车到 Cookie
+                    this.saveCart(cart);
+
+                    // 显示成功消息
+                    swal.fire({
+                        title: "新增成功",
+                        icon: 'success',
+                    });
                 },
-            },
+                getCart: function () {
+                    var cart = Cookies.get('cart');
+                    return cart ? JSON.parse(cart) : [];
+                },
+                saveCart: function (cart) {
+                    Cookies.set('cart', JSON.stringify(cart), { expires: 7, path: '' });
+                }
+            }
         })
+
     </script>
 }
